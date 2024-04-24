@@ -1,9 +1,8 @@
 import random
 import telebot
 from telebot import types
-from telebot import REPLY_MARKUP_TYPES
-from telebot.types import Message
 from datetime import datetime
+import jdatetime as jdate
 import gtts
 import qrcode
 
@@ -77,4 +76,19 @@ def send_voice(message):
 
     user_text = input("enter your english text: ")
     voice_sound = gtts.gTTS(user_text, lang='en')
-    voice_sound.save('english voice.mp3')
+    bot.send_voice(message.chat.id, voice_sound)
+
+@bot.message_handler(commands=['/Age✌'])
+@bot.message_handler(func=lambda message: message.text == "Age 🕵️‍♂️")
+def ask_for_birthdate(message):
+    bot.send_message(message.chat.id, "Please enter your birthdate in Shamsi (Hijri Shamsi) format as: (YYYY/MM/DD).")
+
+@bot.message_handler(func=lambda message: "/" in message.text and len(message.text.split("/")) == 3)
+def calculate_age(message):
+    birthdate = message.text.split("/")
+    birthdate = jdate.date(int(birthdate[0]), int(birthdate[1]), int(birthdate[2]))
+    today = jdate.date.today()
+    age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+    bot.send_message(message.chat.id, f"You are {age} years old.")
+
+bot.infinity_polling()
